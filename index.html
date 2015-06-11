@@ -1,0 +1,293 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+	<title>BackHome</title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0 auto;
+			width:800px;
+			background:black;
+        }
+    </style>
+</head>
+<body>
+<script type="text/javascript">
+
+var game = new Phaser.Game(800, 470, Phaser.CANVAS, 'phaser-example', { preload: preload, create: create, update: update, render: render });
+
+function preload(){
+    game.load.tilemap('landscape', 'assets/landscape.json', null, Phaser.Tilemap.TILED_JSON);
+    game.load.image('tiles', 'assets/tileset_1.png');
+	game.load.spritesheet('gorilla', 'assets/gorillax.png', 45, 42);
+	game.load.spritesheet('player', 'assets/dude.png', 20, 42);
+	game.load.spritesheet('tiger', 'assets/tiger.png', 90, 43);
+	game.load.image('benzinkanister', 'assets/benzin.png');
+	game.load.spritesheet("fish", "assets/fish.png", 25, 20);
+	game.load.image('ufo', 'assets/ufo.png');
+}
+
+var map;
+var tileset;
+var layer;
+var p;
+var tiger;
+var gorilla;
+var fish;
+var fish1;
+var cursors;
+var nachlinks = true;
+var abgestuertzt = false;
+var test;
+var up = true;
+var benzin;
+var score = 0;
+var scoreText;
+
+function create() {
+    game.physics.startSystem(Phaser.Physics.ARCADE); // arcade physics angewendet
+    game.stage.backgroundColor = '#1e6dc5';
+	
+    map = game.add.tilemap('landscape'); // erster name (parameter) der json datei, der oben bei preload verwendet wird
+    map.addTilesetImage('tileset_1', 'tiles'); // name des tilesets, welche im programm tiled verwendet werden.
+
+   	layer3 = map.createLayer('collision'); // name des layers im programm tiled
+   	layer4 = map.createLayer('ttl_water');
+    layer = map.createLayer('sky');
+    //layer.alpha = 0.8; // bestimmt die tranzparenz
+	layer.resizeWorld();
+    layer2 = map.createLayer('raw');
+	layer2.resizeWorld();
+	
+
+    
+
+    map.setCollision(17); // wert aus collision layer
+
+    //  Un-comment this on to see the collision tiles
+    //layer.debug = true;
+
+	//der spieler soll sich erst nach 3 sekunden bewegen können
+	abgestuertzt = false;
+	game.time.events.add(2500, function() {
+		abgestuertzt = true;
+	}, this);
+	
+	/*Spieler*/
+    p = game.add.sprite(55, 105, 'player');
+    p.animations.add('left', [0, 1, 2, 3], 10, true);
+    p.animations.add('right', [5, 6, 7, 8], 10, true);
+	game.physics.enable(p);
+
+	game.camera.follow(p); // kamera folgt den player
+    p.body.bounce.y = 0,8;
+    p.body.linearDamping = 1;
+    p.body.collideWorldBounds = true;
+	
+	/*Gorilla*/
+   	gorilla = game.add.sprite(500, 600, 'gorilla'); // position und parameter von preload
+    gorilla.animations.add('left', [0, 1, 2, 3], 5, true);
+    gorilla.animations.add('right', [5, 6, 7, 8], 5, true);
+	game.physics.enable(gorilla); // bekommt physics
+
+	/*Tiger*/
+	tiger = game.add.sprite(600, 600, "tiger");
+    tiger.animations.add('left', [0, 1, 2], 5, true);
+    tiger.animations.add('right', [3, 4, 5], 5, true);
+	game.physics.enable(tiger);
+
+	/*Fisch*/
+	fish = game.add.sprite(435, 600, "fish");
+	fish.animations.add("up", [0, 1], 4, true);
+	fish.animations.add("down", [2, 3], 4, true);
+	fish1 = game.add.sprite(415, 600, "fish");
+	fish1.animations.add("up", [0, 1], 4, true);
+	fish1.animations.add("down", [2, 3], 4, true);
+	game.physics.enable(fish);
+	game.physics.enable(fish1);
+
+	fish.body.bounce.y = 0,8;
+    fish.body.linearDamping = 1;
+    fish.body.collideWorldBounds = true;
+    fish1.body.bounce.y = 0,8;
+    fish1.body.linearDamping = 1;
+    fish1.body.collideWorldBounds = true;
+
+    /*UFO*/
+	ufo = game.add.group();
+    ufo.enableBody = true;
+    ufo.create(0, 100, 'ufo');
+
+    /*benzin*/
+    benzin = game.add.group();
+    benzin.enableBody = true;
+	benzin.create(500, 600, 'benzinkanister');
+	benzin.create(950, 600, 'benzinkanister');
+
+
+
+    game.physics.arcade.gravity.y = 250;
+
+
+
+    cursors = game.input.keyboard.createCursorKeys(); // interaktion durch tasten 
+
+    /*Liter*/
+	scoreText = game.add.text(32, 16, '0 Liter', {fontSize: '32px', fill: '#fff' });
+	scoreText.fixedToCamera = true; // immer im bild
+}
+
+function update() {
+
+     game.physics.arcade.collide(p, layer3);
+     game.physics.arcade.collide(p, layer4);
+     game.physics.arcade.collide(p, layer4, timeToLiveUnderWater, null, this);
+	 game.physics.arcade.collide(benzin, layer3);
+	 game.physics.arcade.collide(gorilla, layer3);
+	 game.physics.arcade.collide(ufo, layer3);
+	 game.physics.arcade.collide(tiger, layer3);	 
+	 game.physics.arcade.collide(p, gorilla, stirb, null, this);
+	 game.physics.arcade.collide(p, tiger, stirb, null, this);
+	 game.physics.arcade.collide(p, fish, stirbPiranha, null, this);
+	 game.physics.arcade.collide(p, fish1, stirbPiranha, null, this);
+	 game.physics.arcade.overlap(p, benzin, sammelBenzin, null, this);
+	
+	
+    p.body.velocity.x = 0; // bewegung ohne was zu machen
+	
+
+    /*player*/
+
+    if (cursors.up.isDown)
+    {
+        if (p.body.onFloor())
+        {
+            p.body.velocity.y = -200;
+        }
+    }
+
+    if (cursors.left.isDown && abgestuertzt)
+    {
+		p.animations.play('left');
+        p.body.velocity.x = -150;
+    }
+    else if (cursors.right.isDown && abgestuertzt)
+    {
+		p.animations.play('right');
+        p.body.velocity.x = 150;
+    }else
+    {
+        //  Stand still
+        p.animations.stop();
+		p.frame = 4;
+	}
+
+
+	/*tiger*/
+	
+	if(tiger.nachlinks) {
+		tiger.animations.play('left');
+        tiger.body.velocity.x = -40;
+	} else {
+		tiger.animations.play('right');
+        tiger.body.velocity.x = +40;
+	}
+	
+	if(tiger.body.blocked.left) {
+		tiger.nachlinks = false;
+		console.log('links blockiert');
+	} else if(tiger.body.blocked.right){
+		tiger.nachlinks = true;	
+		console.log('rechts blockiert');
+	}
+
+	/*gorilla*/
+
+	if(nachlinks) {
+		gorilla.animations.play('left');
+        gorilla.body.velocity.x = -40;
+	} else {
+		gorilla.animations.play('right');
+        gorilla.body.velocity.x = +40;
+	}
+	
+	if(gorilla.body.blocked.left) {
+		nachlinks = false;
+		console.log('links blockiert');
+	} else if(gorilla.body.blocked.right){
+		nachlinks = true;	
+		console.log('rechts blockiert');
+	}
+
+	/*fisch*/
+	if (fish.body.onFloor()){
+        fish.animations.play("up");
+		fish.body.velocity.y= -350;
+    }
+
+    if(fish.body.velocity.y >= 0){
+        fish.animations.play("down");
+    }
+
+    if (fish1.body.onFloor()){
+        fish1.animations.play("up");
+		fish1.body.velocity.y= -250; // velocity ist die geschwindigkeit
+	}
+
+    if(fish1.body.velocity.y >= 0){
+        fish1.animations.play("down");
+    }
+}
+
+function timeToLiveUnderWater (player, water){	
+	if(layer4.touching){
+		for(counter = 7; counter > 1; counter --){
+			game.time.events.add(2500, function() {
+				counter = counter -1;
+			}, this);
+
+			scoreText = game.add.text(32, 50, counter + ' seconds to leave!', {fontSize: '32px', fill: '#fff' })
+			scoreText.fixedToCamera = true; // immer im bild
+		}
+		p.kill();
+	}
+}
+
+function sammelBenzin (player, benzinkanister) { 
+    benzinkanister.kill();
+    score += 10;
+    scoreText.text = score+' Liter';
+}
+
+function stirb (player, tier) { 
+	if(tier.body.touching.up){
+		tier.kill();	
+	}
+	else{
+		p.kill();
+		game.state.start(game.state.current);
+	}
+}
+
+function stirbPiranha (player, fisch) { 
+	if(fish.body.touching.up){
+		p.kill();
+		game.state.start(game.state.current);
+
+	}
+	else{
+		p.kill();
+		game.state.start(game.state.current);
+
+	}
+}
+
+function render() {
+
+    //game.debug.body(p);
+    //game.debug.bodyInfo(p, 32, 320);
+}
+</script>
+</body>
+</html>
