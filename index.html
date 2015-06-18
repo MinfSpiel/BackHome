@@ -47,23 +47,29 @@ var scoreText;
 
 function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE); // arcade physics angewendet
+    	this.game.physics.arcade.TILE_BIAS = 27;
+
     game.stage.backgroundColor = '#1e6dc5';
 	
     map = game.add.tilemap('landscape'); // erster name (parameter) der json datei, der oben bei preload verwendet wird
     map.addTilesetImage('tileset_1', 'tiles'); // name des tilesets, welche im programm tiled verwendet werden.
     
 
-   	//layer3 = map.createLayer('collision'); // name des layers im programm tiled
-   	layer = map.createLayer('sky');
+   	layer3 = map.createLayer('collision'); // name des layers im programm tiled
    	layer4 = map.createLayer('ttl_water');
+   	layer2 = map.createLayer('raw');
+	layer2.resizeWorld();
+	
+   	layer = map.createLayer('sky');
+   	
     //layer.alpha = 0.8; // bestimmt die tranzparenz
 	layer.resizeWorld();
-    layer2 = map.createLayer('raw');
-	layer2.resizeWorld();
 
 
-    map.setCollision(5); // wert aus collision layer
-    map.setCollision(2); // wert aus collision layer
+
+
+    map.setCollision(17); // wert aus collision layer
+
 
 
     //  Un-comment this on to see the collision tiles
@@ -141,15 +147,15 @@ function create() {
 
 function update() {
 
-     game.physics.arcade.collide(p, layer2);
-     game.physics.arcade.collide(p, layer4);
-     game.physics.arcade.collide(p, layer4, timeToLiveUnderWater, null, this);
-	 game.physics.arcade.collide(benzin, layer2);
-	 game.physics.arcade.collide(gorilla, layer2);
-	 game.physics.arcade.collide(ufo, layer2);
-	 game.physics.arcade.collide(tiger, layer2);	 
+     game.physics.arcade.collide(p, layer3);
+     //game.physics.arcade.collide(p, layer4, timeToLiveUnderWater, null, this);
+	 game.physics.arcade.collide(benzin, layer3);
+	 game.physics.arcade.collide(gorilla, layer3);
+	 game.physics.arcade.collide(ufo, layer3);
+	 game.physics.arcade.collide(tiger, layer3);	 
 	 game.physics.arcade.collide(p, gorilla, stirb, null, this);
 	 game.physics.arcade.collide(p, tiger, stirb, null, this);
+	  game.physics.arcade.collide(p, layer4, timeToLiveUnderWater, null, this);
 	 game.physics.arcade.collide(p, fish, stirbPiranha, null, this);
 	 game.physics.arcade.collide(p, fish1, stirbPiranha, null, this);
 	 game.physics.arcade.overlap(p, benzin, sammelBenzin, null, this);
