@@ -21,7 +21,7 @@ function preload(){
     game.load.tilemap('landscape', 'assets/landscape.json', null, Phaser.Tilemap.TILED_JSON);
     game.load.image('tiles', 'assets/tileset_1.png');
 	game.load.spritesheet('gorilla', 'assets/gorillax.png', 45, 42);
-	game.load.spritesheet('player', 'assets/dude.png', 20, 42);
+	game.load.spritesheet('player', 'assets/alien_new.png', 24, 61);
 	game.load.spritesheet('tiger', 'assets/tiger.png', 90, 43);
 	game.load.image('benzinkanister', 'assets/benzin.png');
 	game.load.spritesheet("fish", "assets/fish.png", 25, 20);
@@ -51,19 +51,20 @@ function create() {
 	
     map = game.add.tilemap('landscape'); // erster name (parameter) der json datei, der oben bei preload verwendet wird
     map.addTilesetImage('tileset_1', 'tiles'); // name des tilesets, welche im programm tiled verwendet werden.
+    
 
-   	layer3 = map.createLayer('collision'); // name des layers im programm tiled
+   	//layer3 = map.createLayer('collision'); // name des layers im programm tiled
+   	layer = map.createLayer('sky');
    	layer4 = map.createLayer('ttl_water');
-    layer = map.createLayer('sky');
     //layer.alpha = 0.8; // bestimmt die tranzparenz
 	layer.resizeWorld();
     layer2 = map.createLayer('raw');
 	layer2.resizeWorld();
-	
 
-    
 
-    map.setCollision(17); // wert aus collision layer
+    map.setCollision(5); // wert aus collision layer
+    map.setCollision(2); // wert aus collision layer
+
 
     //  Un-comment this on to see the collision tiles
     //layer.debug = true;
@@ -98,10 +99,10 @@ function create() {
 	game.physics.enable(tiger);
 
 	/*Fisch*/
-	fish = game.add.sprite(435, 600, "fish");
+	fish = game.add.sprite(1270, 600, "fish");
 	fish.animations.add("up", [0, 1], 4, true);
 	fish.animations.add("down", [2, 3], 4, true);
-	fish1 = game.add.sprite(415, 600, "fish");
+	fish1 = game.add.sprite(1250, 600, "fish");
 	fish1.animations.add("up", [0, 1], 4, true);
 	fish1.animations.add("down", [2, 3], 4, true);
 	game.physics.enable(fish);
@@ -140,13 +141,13 @@ function create() {
 
 function update() {
 
-     game.physics.arcade.collide(p, layer3);
+     game.physics.arcade.collide(p, layer2);
      game.physics.arcade.collide(p, layer4);
      game.physics.arcade.collide(p, layer4, timeToLiveUnderWater, null, this);
-	 game.physics.arcade.collide(benzin, layer3);
-	 game.physics.arcade.collide(gorilla, layer3);
-	 game.physics.arcade.collide(ufo, layer3);
-	 game.physics.arcade.collide(tiger, layer3);	 
+	 game.physics.arcade.collide(benzin, layer2);
+	 game.physics.arcade.collide(gorilla, layer2);
+	 game.physics.arcade.collide(ufo, layer2);
+	 game.physics.arcade.collide(tiger, layer2);	 
 	 game.physics.arcade.collide(p, gorilla, stirb, null, this);
 	 game.physics.arcade.collide(p, tiger, stirb, null, this);
 	 game.physics.arcade.collide(p, fish, stirbPiranha, null, this);
@@ -223,7 +224,7 @@ function update() {
 	/*fisch*/
 	if (fish.body.onFloor()){
         fish.animations.play("up");
-		fish.body.velocity.y= -350;
+		fish.body.velocity.y= -390;
     }
 
     if(fish.body.velocity.y >= 0){
@@ -232,7 +233,7 @@ function update() {
 
     if (fish1.body.onFloor()){
         fish1.animations.play("up");
-		fish1.body.velocity.y= -250; // velocity ist die geschwindigkeit
+		fish1.body.velocity.y= -370; // velocity ist die geschwindigkeit
 	}
 
     if(fish1.body.velocity.y >= 0){
