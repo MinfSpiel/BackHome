@@ -1,3 +1,4 @@
+
 <!doctype html> 
 <html lang="en"> 
 <head> 
@@ -18,17 +19,26 @@
 var game = new Phaser.Game(800, 470, Phaser.CANVAS, 'phaser-example', { preload: preload, create: create, update: update, render: render });
 
 function preload(){
-    game.load.tilemap('landscape', 'assets/landscape.json', null, Phaser.Tilemap.TILED_JSON);
+    game.load.tilemap('landscape', 'assets/landscape_level1.json', null, Phaser.Tilemap.TILED_JSON); //json datei
+	game.load.tilemap('landscape2', 'assets/landscape_level2.json', null, Phaser.Tilemap.TILED_JSON); //json datei
     game.load.image('tiles', 'assets/tileset_1.png');
+    game.load.image('tiles_wolken', 'assets/tileset_2.png');
+    game.load.image('tiles_landeflug', 'assets/tileset_3.png');
+	game.load.image('tiles_gras', 'assets/tileset_1-1.png');
 	game.load.spritesheet('gorilla', 'assets/gorillax.png', 45, 42);
-	game.load.spritesheet('player', 'assets/alien_new.png', 24, 61);
+	game.load.spritesheet('player', 'assets/alien_new.png', 24, 55);
 	game.load.spritesheet('tiger', 'assets/tiger.png', 90, 43);
 	game.load.image('benzinkanister', 'assets/benzin.png');
+	game.load.spritesheet('pauseButton', 'assets/button.png', 104, 55);
 	game.load.spritesheet("fish", "assets/fish.png", 25, 20);
 	game.load.image('ufo', 'assets/ufo.png');
+	game.load.spritesheet('steinball', 'assets/stein.png');
 }
-
+var zahl = 5; // time to live
 var map;
+var map2;
+var button;
+var pauseButton;
 var tileset;
 var layer;
 var p;
@@ -37,6 +47,7 @@ var gorilla;
 var fish;
 var fish1;
 var cursors;
+var spaceKey;
 var nachlinks = true;
 var abgestuertzt = false;
 var test;
@@ -44,6 +55,7 @@ var up = true;
 var benzin;
 var score = 0;
 var scoreText;
+var level = 1;
 
 function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE); // arcade physics angewendet
@@ -51,47 +63,71 @@ function create() {
 
     game.stage.backgroundColor = '#1e6dc5';
 	
+	map2 = game.add.tilemap('landscape2'); // erster name (parameter) der json datei, der oben bei preload verwendet wird
+    map2.addTilesetImage('tileset_1', 'tiles'); // name des tilesets, welche im programm tiled verwendet werden.
+    map2.addTilesetImage('tileset_2', 'tiles_wolken');
+    map2.addTilesetImage('tileset_3', 'tiles_landeflug');
+	map2.addTilesetImage('tileset_1-1', 'tiles_gras');
+	
     map = game.add.tilemap('landscape'); // erster name (parameter) der json datei, der oben bei preload verwendet wird
     map.addTilesetImage('tileset_1', 'tiles'); // name des tilesets, welche im programm tiled verwendet werden.
-    
-
-   	layer3 = map.createLayer('collision'); // name des layers im programm tiled
-   	layer4 = map.createLayer('ttl_water');
-   	layer2 = map.createLayer('raw');
-	layer2.resizeWorld();
+    map.addTilesetImage('tileset_2', 'tiles_wolken');
+    map.addTilesetImage('tileset_3', 'tiles_landeflug');
 	
+	
+	
+	
+	
+   	layer3 = map.createLayer('collision'); // name des layers im programm tiled
+   	layer3.resizeWorld();
+   	layer4 = map.createLayer('ttl_water');
+   	layer5 = map.createLayer('wolken');
+   	layer5.resizeWorld();
+   	layer5.wrap = true; // wiederholt den layer
+   	layer5.scrollFactorX = 0.5; // parallax
+   	layer2 = map.createLayer('raw');
+   	layer2.resizeWorld();
    	layer = map.createLayer('sky');
-   	
-    //layer.alpha = 0.8; // bestimmt die tranzparenz
-	layer.resizeWorld();
-
-
+   	layer.resizeWorld();
+   	//layer.scrollFactorY = 0.5;
+	//layer.alpha = 0.8; // bestimmt die tranzparenz
+	
+	layer6 = map2.createLayer('collision2');
+   	layer6.resizeWorld();
+	layer6.visible = false;
+	layer7 = map2.createLayer('raw2');
+   	layer7.resizeWorld();
+	layer7.visible = false;
 
 
     map.setCollision(17); // wert aus collision layer
-
-
-
+	
     //  Un-comment this on to see the collision tiles
     //layer.debug = true;
 
 	//der spieler soll sich erst nach 3 sekunden bewegen können
 	abgestuertzt = false;
-	game.time.events.add(2500, function() {
+	game.time.events.add(500, function() {
 		abgestuertzt = true;
 	}, this);
-	
+
+	/*button*/
+	this.pauseButton = this.game.add.sprite(10, 50, 'pauseButton');
+	this.pauseButton.inputEnabled = true;
+	this.pauseButton.events.onInputUp.add(function () {this.game.paused = true;},this);
+	this.game.input.onDown.add(function () {if(this.game.paused)this.game.paused = false;},this);
+	this.pauseButton.fixedToCamera = true;
+
 	/*Spieler*/
-    p = game.add.sprite(55, 105, 'player');
+    p = game.add.sprite(55, 1800, 'player');
     p.animations.add('left', [0, 1, 2, 3], 10, true);
     p.animations.add('right', [5, 6, 7, 8], 10, true);
 	game.physics.enable(p);
-
 	game.camera.follow(p); // kamera folgt den player
     p.body.bounce.y = 0,8;
     p.body.linearDamping = 1;
     p.body.collideWorldBounds = true;
-	
+
 	/*Gorilla*/
    	gorilla = game.add.sprite(500, 600, 'gorilla'); // position und parameter von preload
     gorilla.animations.add('left', [0, 1, 2, 3], 5, true);
@@ -99,7 +135,7 @@ function create() {
 	game.physics.enable(gorilla); // bekommt physics
 
 	/*Tiger*/
-	tiger = game.add.sprite(600, 600, "tiger");
+	tiger = game.add.sprite(2500, 600, "tiger");
     tiger.animations.add('left', [0, 1, 2], 5, true);
     tiger.animations.add('right', [3, 4, 5], 5, true);
 	game.physics.enable(tiger);
@@ -132,37 +168,67 @@ function create() {
 	benzin.create(500, 600, 'benzinkanister');
 	benzin.create(950, 600, 'benzinkanister');
 
-
+	/*unter wasser*/
+	map.setCollision(18, true, layer4);
+	map.setTileIndexCallback(18, timeToLiveUnderWater, game, layer4);
 
     game.physics.arcade.gravity.y = 250;
 
+	cursors = game.input.keyboard.createCursorKeys(); // interaktion durch tasten
+	
 
+	/*leertaste*/
+	/*spaceKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR); // spacetaste
+    spaceKey.onDown.add(togglePause, this);
 
-    cursors = game.input.keyboard.createCursorKeys(); // interaktion durch tasten 
+	function togglePause() {
+    	game.physics.arcade.isPaused = (game.physics.arcade.isPaused) ? false : true;
+	}*/
 
     /*Liter*/
-	scoreText = game.add.text(32, 16, '0 Liter', {fontSize: '32px', fill: '#fff' });
+	scoreText = game.add.text(10, 16, '0 Liter', {fontSize: '32px', fill: '#fff' });
 	scoreText.fixedToCamera = true; // immer im bild
 }
 
 function update() {
 
-     game.physics.arcade.collide(p, layer3);
-     //game.physics.arcade.collide(p, layer4, timeToLiveUnderWater, null, this);
+	game.physics.arcade.collide(p, layer4, timeToLiveUnderWater, null, this);
+     game.physics.arcade.collide(p, layer3); // collision mit player und grundboden
+     game.physics.arcade.collide(p, layer6); // collision mit player und grundboden
+	 game.physics.arcade.collide(p, layer7); // collision mit player und grundboden
 	 game.physics.arcade.collide(benzin, layer3);
 	 game.physics.arcade.collide(gorilla, layer3);
 	 game.physics.arcade.collide(ufo, layer3);
 	 game.physics.arcade.collide(tiger, layer3);	 
 	 game.physics.arcade.collide(p, gorilla, stirb, null, this);
 	 game.physics.arcade.collide(p, tiger, stirb, null, this);
-	  game.physics.arcade.collide(p, layer4, timeToLiveUnderWater, null, this);
 	 game.physics.arcade.collide(p, fish, stirbPiranha, null, this);
 	 game.physics.arcade.collide(p, fish1, stirbPiranha, null, this);
 	 game.physics.arcade.overlap(p, benzin, sammelBenzin, null, this);
 	
 	
-    p.body.velocity.x = 0; // bewegung ohne was zu machen
-	
+    p.body.velocity.x = 0; // bewegung ohne was zu machen	
+
+	if(level === 1 && p.x > 6375){
+		p.body.x = 0;
+		p.body.y = 0;
+		layer.destroy();
+		layer2.destroy();
+		layer3.destroy();
+		
+		layer6.visible = true;
+		layer7.visible = true;
+		
+		map2.setCollision(479);
+		level = 2;
+	} 
+	if(level === 2 && p.x > 6375){
+		p.body.x = 0;
+		p.body.y = 0;
+		
+		map2.setCollision(479);
+		level = 3;
+	}
 
     /*player*/
 
@@ -247,23 +313,35 @@ function update() {
     }
 }
 
-function timeToLiveUnderWater (player, water){	
-	if(layer4.touching){
+/*function timeToLiveUnderWater (player, layer3){
+	if(layer3.touching){
 		for(counter = 7; counter > 1; counter --){
 			game.time.events.add(2500, function() {
 				counter = counter -1;
 			}, this);
 
-			scoreText = game.add.text(32, 50, counter + ' seconds to leave!', {fontSize: '32px', fill: '#fff' })
+			scoreText = game.add.text(20, 20, counter + ' seconds to leave!', {fontSize: '32px', fill: '#fff' })
 			scoreText.fixedToCamera = true; // immer im bild
 		}
 		p.kill();
 	}
+}*/
+
+function timeToLiveUnderWater (player, water){
+	/*timeToLeave = game.add.text(32, 50, 'Counter jetzt starten!', {fontSize: '35px', fill: '#fff' })*/
+    p.body.bounce.y = 1;
+	p.kill();
+	game.state.start(game.state.current); // replay
+
+	/*timeToLeave.fixedToCamera = true; // immer im bild
+	for(var i = zahl; i > 0; i--){
+		timeToLeave.text = i + 'seconds to leave!';
+	}*/
 }
 
 function sammelBenzin (player, benzinkanister) { 
     benzinkanister.kill();
-    score += 10;
+    score += 2;
     scoreText.text = score+' Liter';
 }
 
@@ -271,9 +349,9 @@ function stirb (player, tier) {
 	if(tier.body.touching.up){
 		tier.kill();	
 	}
-	else{
+	else {
 		p.kill();
-		game.state.start(game.state.current);
+		game.state.start(game.state.current); // replay
 	}
 }
 
