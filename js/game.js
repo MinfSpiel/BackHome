@@ -128,11 +128,7 @@ function create() {
 	map.setCollision(38, true, layer4);
 	map.setTileIndexCallback(38, killingWater, game, layer4);
 	
-	map2.setCollision(38, true, layer10);
-	map2.setTileIndexCallback(38, killingWater, game, layer10);
 	
-	map3.setCollision(38, true, layer13);
-	map3.setTileIndexCallback(38, killingWater, game, layer13);
 
 	//der spieler soll sich erst nach 3 sekunden bewegen können
 	abgestuertzt = false;
@@ -162,7 +158,7 @@ function create() {
 	
 
 	/*Gorilla*/
-   	gorilla = game.add.sprite(1500, 2000, 'gorilla'); // position und parameter von preload
+   	gorilla = game.add.sprite(400, 2000, 'gorilla'); // position und parameter von preload
     gorilla.animations.add('left', [0, 1, 2, 3], 5, true);
     gorilla.animations.add('right', [5, 6, 7, 8], 5, true);
 	game.physics.enable(gorilla); // bekommt physics
@@ -265,11 +261,16 @@ function update() {
 		layer6.visible = true;
 		layer7.visible = true;
 		
+		map2.setCollision(38, true, layer10);
+	map2.setTileIndexCallback(38, killingWater, game, layer10);
+	
+	
+		
 		map2.setCollision(37);
 		level = 2;
 		scoreText.text = score+' Liter | Level' + level;
 	} 
-	if(level === 2 && p.x > 300){
+	if(level === 2 && p.x > 6376){
 		p.body.x = 0;
 		p.body.y = 2000;
 		
@@ -284,6 +285,9 @@ function update() {
 		layer15.visible = true;
 		layer16.visible = true;
 
+		map3.setCollision(38, true, layer13);
+	map3.setTileIndexCallback(38, killingWater, game, layer13);
+	
 		map3.setCollision(37);
 		level = 3;
 		scoreText.text = score+' Liter | Level' + level;
@@ -387,7 +391,8 @@ function update() {
 function killingWater (player, water){
 	/*timeToLeave = game.add.text(32, 50, 'Counter jetzt starten!', {fontSize: '35px', fill: '#fff' })*/
 	p.kill();
-	game.state.start(game.state.current); // replay
+	//game.state.start(game.state.current); // replay
+		console.log("1");
 }
 
 function sammelBenzin (player, benzinkanister) { 
@@ -398,12 +403,14 @@ function sammelBenzin (player, benzinkanister) {
 
 function stirb (player, tier) {
 		p.kill();
-		game.state.start(game.state.current); // replay
+		//game.state.start(game.state.current); // replay
+		console.log("2");
 }
 
 function stirbPiranha (player, fisch) { 
 		p.kill();
-		game.state.start(game.state.current);
+		//game.state.start(game.state.current);
+		console.log("3");
 		
 }
 
