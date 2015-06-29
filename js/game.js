@@ -38,6 +38,7 @@ var benzin;
 var score = 0;
 var scoreText;
 var level = 1;
+var leben = 3;
 
 function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE); // arcade physics angewendet
@@ -113,12 +114,6 @@ function create() {
 	layer15.visible = false;
    	layer15.resizeWorld();
 	
-	
-	
-	
-	
-	
-
 
     map.setCollision(37); // wert aus collision layer
 	
@@ -126,7 +121,7 @@ function create() {
 
 	/*collision für unter wasser*/
 	map.setCollision(38, true, layer4);
-	map.setTileIndexCallback(38, killingWater, game, layer4);
+	map.setTileIndexCallback(38, stirb, game, layer4);
 	
 	
 
@@ -224,27 +219,45 @@ function update() {
 
 	/*methoden die bei bestimmten kollisionen stattfinden*/
     game.physics.arcade.collide(p, layer3); // collision mit player und grundboden -> level 1
-	game.physics.arcade.collide(p, layer4, killingWater, null, this)
+	game.physics.arcade.collide(p, layer4, stirb, null, this)
     game.physics.arcade.collide(p, layer6); // collision mit player und grundboden -> level 2
-	game.physics.arcade.collide(p, layer10, killingWater, null, this)
+	game.physics.arcade.collide(p, layer10, stirb, null, this)
 	game.physics.arcade.collide(p, layer12); // collision mit player und grundboden -> level 3
-	game.physics.arcade.collide(p, layer13, killingWater, null, this);
+	game.physics.arcade.collide(p, layer13, stirb, null, this);
+	
+	/* level 1 collisions */
 	game.physics.arcade.collide(benzin, layer3);
 	game.physics.arcade.collide(gorilla, layer3);
 	game.physics.arcade.collide(ufo, layer3);
 	game.physics.arcade.collide(tiger, layer3);
-	game.physics.arcade.collide(tiger1, layer3);	 
+	game.physics.arcade.collide(tiger1, layer3);
+	
+	/* level 2 collisions */
+	game.physics.arcade.collide(benzin, layer6);
+	game.physics.arcade.collide(gorilla, layer6);
+	game.physics.arcade.collide(ufo, layer6);
+	game.physics.arcade.collide(tiger, layer6);
+	game.physics.arcade.collide(tiger1, layer6);
+	
+	/* level 3 collisions */
+	game.physics.arcade.collide(benzin, layer12);
+	game.physics.arcade.collide(gorilla, layer12);
+	game.physics.arcade.collide(ufo, layer12);
+	game.physics.arcade.collide(tiger, layer12);
+	game.physics.arcade.collide(tiger1, layer12);
+		 
 	game.physics.arcade.overlap(p, gorilla, stirb, null, this);
 	game.physics.arcade.overlap(p, tiger, stirb, null, this);
 	game.physics.arcade.overlap(p, tiger1, stirb, null, this);
-	game.physics.arcade.collide(p, fish, stirbPiranha, null, this);
-	game.physics.arcade.collide(p, fish1, stirbPiranha, null, this);
+	game.physics.arcade.collide(p, fish, stirb, null, this);
+	game.physics.arcade.collide(p, fish1, stirb, null, this);
 	game.physics.arcade.overlap(p, benzin, sammelBenzin, null, this);
 	
 	
     p.body.velocity.x = 0; // bewegung ohne was zu machen	
 
-	if(level === 1 && p.x > 200){
+	if(level === 1 && p.x > 6374){
+		level = 2;
 		p.body.x = 0;
 		p.body.y = 2169;
 		
@@ -256,37 +269,37 @@ function update() {
 		fish.kill();
 		fish1.kill();
 		
-		layer10.visible = true;
+		layer10.visible = false;
 		layer11.visible = true;
-		layer6.visible = true;
+		layer6.visible = false;
 		layer7.visible = true;
 		
 		map2.setCollision(38, true, layer10);
-	map2.setTileIndexCallback(38, killingWater, game, layer10);
+		map2.setTileIndexCallback(38, stirb, game, layer10);
 	
-	
+		//ufo.setVisible(false);
 		
 		map2.setCollision(37);
-		level = 2;
+		
 		scoreText.text = score+' Liter | Level' + level;
 	} 
-	if(level === 2 && p.x > 6376){
+	if(level === 2 && p.x > 6375){
 		p.body.x = 0;
-		p.body.y = 2000;
+		p.body.y = 2153;
 		
 		layer10.destroy();
 		layer11.destroy();
 		layer6.destroy();
 		layer7.destroy();
 		
-		layer12.visible = true;
+		layer12.visible = false;
 		layer13.visible = true;
 		layer14.visible = true;
 		layer15.visible = true;
 		layer16.visible = true;
 
 		map3.setCollision(38, true, layer13);
-	map3.setTileIndexCallback(38, killingWater, game, layer13);
+		map3.setTileIndexCallback(38, stirb, game, layer13);
 	
 		map3.setCollision(37);
 		level = 3;
@@ -387,14 +400,6 @@ function update() {
 }
 
 
-
-function killingWater (player, water){
-	/*timeToLeave = game.add.text(32, 50, 'Counter jetzt starten!', {fontSize: '35px', fill: '#fff' })*/
-	p.kill();
-	//game.state.start(game.state.current); // replay
-		console.log("1");
-}
-
 function sammelBenzin (player, benzinkanister) { 
     benzinkanister.kill();
     score += 2;
@@ -402,19 +407,41 @@ function sammelBenzin (player, benzinkanister) {
 }
 
 function stirb (player, tier) {
-		p.kill();
+	leben = leben -1;
+	if(level === 1){
+		if(leben < 1) {
+			p.kill();
+			game.state.start(game.state.current); // replay
+			leben = 3;
+		} else {
+			p.body.x = 0;
+			p.body.y = 2153;
+		}
+	} else if(level === 2){
+		if(leben < 1) {
+			p.kill();
+			game.state.start(game.state.current); // replay
+			leben = 3;
+		}  else {
+			p.body.x = 0;
+			p.body.y = 2169;
+		}
+	} else if(level === 3){
+		if(leben < 1) {
+			p.kill();
+			game.state.start(game.state.current); // replay
+			leben = 3;
+		}  else {
+			p.body.x = 0;
+			p.body.y = 2153;
+		}
+	}
+		//p.kill();
 		//game.state.start(game.state.current); // replay
-		console.log("2");
-}
-
-function stirbPiranha (player, fisch) { 
-		p.kill();
-		//game.state.start(game.state.current);
-		console.log("3");
-		
+		//console.log("2");
 }
 
 function render() {
-    game.debug.body(p);
-    game.debug.bodyInfo(p, 32, 320);
+    //game.debug.body(p);
+    //game.debug.bodyInfo(p, 32, 320);
 }
