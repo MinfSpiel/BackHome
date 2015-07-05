@@ -20,6 +20,8 @@ function preload(){
 	game.load.image("2leben", "assets/2leben.png");
 	game.load.image("1leben", "assets/1leben.png");
 	game.load.image("0leben", "assets/0leben.png");
+	
+	game.load.spritesheet('rain', 'assets/rain.png', 17, 17);
 }
 var zahl = 5; // time to live
 var map;
@@ -72,7 +74,19 @@ function create() {
     //map.addTilesetImage('background', 'background');
 	
 	
-	
+	/*Rain*/
+    var emitter = game.add.emitter(game.world.centerX, 0, 400);
+    game.physics.enable(emitter);
+    emitter.width = game.world.width;
+	emitter.makeParticles('rain');
+	emitter.minParticleScale = 0.1;
+	emitter.maxParticleScale = 0.5;
+	emitter.setYSpeed(300, 500);
+	emitter.setXSpeed(-5, 5);
+	emitter.minRotation = 0;
+	emitter.maxRotation = 0;
+	emitter.start(false, 1600, 5, 0);
+	emitter.fixedToCamera = true;
 	
 	
    	/*level 1*/
