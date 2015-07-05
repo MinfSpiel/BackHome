@@ -48,6 +48,7 @@ body {
 
 <div id="header">
 <h1>Back Home</h1>
+<p><p id="back" style="cursor:pointer;">Zurück</p>
 </div>
 
 <div id="phaser-example"></div>
@@ -60,18 +61,27 @@ body {
 </div>
 <script>
 $( document ).ready(function() {
-	
+	$( "#back" ).hide();
 	$( "#starten" ).click(function() {
 		$.getScript("js/game.js");
 		$( "#section" ).hide();
-		//$( "#phaser-example" ).remove();
+		$( "#back" ).toggle();
 	});				
 
 	$( "#intro" ).click(function() {
-		$.getScript("intro.html");
 		$( "#section" ).hide();
-		$("#video").html('<video controls><source src="assets/UFO.mp4" type="video/mp4" /></video>');
-        
+		$("#video").html('<video autoplay width="800" id="videointro" controls><source src="assets/UFO.mp4" type="video/mp4" /></video>');
+		$("#videointro").prop("controls", false);
+		$( "#video" ).show();
+        $( "#back" ).toggle();
+	});	
+	
+	$( "#back" ).click(function() {
+		$( "#section" ).show();
+		$( "#video" ).hide();
+		$('video')[0].pause();
+		$( "#phaser-example" ).empty();
+		$( "#back" ).toggle();
 	});	
 });
 </script>
