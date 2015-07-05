@@ -65,7 +65,7 @@ $( document ).ready(function() {
 	$( "#starten" ).click(function() {
 		$.getScript("js/game.js");
 		$( "#section" ).hide();
-		$( "#back" ).toggle();
+		$( "#back" ).show();
 	});				
 
 	$( "#intro" ).click(function() {
@@ -73,15 +73,16 @@ $( document ).ready(function() {
 		$("#video").html('<video autoplay width="800" id="videointro" controls><source src="assets/UFO.mp4" type="video/mp4" /></video>');
 		$("#videointro").prop("controls", false);
 		$( "#video" ).show();
-        $( "#back" ).toggle();
+        $( "#back" ).show();
 	});	
 	
 	$( "#back" ).click(function() {
+		$( "#phaser-example" ).remove();
 		$( "#section" ).show();
 		$( "#video" ).hide();
 		$('video')[0].pause();
 		$( "#phaser-example" ).empty();
-		$( "#back" ).toggle();
+		$( "#back" ).hide();
 	});	
 });
 </script>
