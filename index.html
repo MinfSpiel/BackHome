@@ -36,10 +36,13 @@ body {
 
 </head>
 <body>
+    
+ 
+
 <!--<audio autoplay loop>
-<audio autoplay>
-  <source src="assets/Dirili%C5%9F%20Ertu%C4%9Frul%20Jenerik.mp3" type="audio/mpeg">
-</audio>-->
+
+  <source src="assets/sound.mp3" type="audio/mpeg">
+</audio> -->
 
 
 
@@ -49,15 +52,26 @@ body {
 
 <div id="phaser-example"></div>
 <div id="section">
+   
 <img class="imgbutton" id="starten" src="assets/start.png" ><br><br>
 <img class="imgbutton" id="introduction" src="assets/introduction.png"><br><br>
-<img class="imgbutton" id="about" src="assets/about.png">
+<img class="imgbutton" id="introduction" src="assets/about.png">
 </div>
 <script>
 $( document ).ready(function() {
 	
 $( "#starten" ).click(function() {
 	$.getScript("js/game.js");
+  	$( "#section" ).hide();
+	//$( "#phaser-example" ).remove();
+});				
+});
+</script>
+<script>    
+    $( document ).ready(function() {
+	
+$( "#Intro" ).click(function() {
+	$.getScript("intro.html");
   	$( "#section" ).hide();
 	//$( "#phaser-example" ).remove();
 });				
