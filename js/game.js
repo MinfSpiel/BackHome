@@ -8,6 +8,7 @@ function preload(){
     game.load.image('tiles_wolken', 'assets/tileset_2.png');
     game.load.image('tiles_himmel', 'assets/tileset_3.png');
 	game.load.spritesheet('gorilla', 'assets/gorillax.png', 45, 42);
+    game.load.spritesheet('snake', 'assets/schlange-01.png', 50, 43);
 	game.load.spritesheet('player', 'assets/alien_new.png', 24, 55);
 	game.load.spritesheet('tiger', 'assets/tiger.png', 90, 43);
     
@@ -20,9 +21,11 @@ function preload(){
 	game.load.image("2leben", "assets/2leben.png");
 	game.load.image("1leben", "assets/1leben.png");
 	game.load.image("0leben", "assets/0leben.png");
-	game.load.spritesheet('rain', 'assets/rain.png', 17, 17);
-	game.load.audio('noise', 'assets/sound.mp3');
+	
 	game.load.image('sprechblase', 'assets/sprechblase.png');
+
+	
+	game.load.spritesheet('rain', 'assets/rain.png', 17, 17);
 }
 var zahl = 5; // time to live
 var map;
@@ -34,24 +37,26 @@ var tileset;
 var layer;
 var p;
 var tiger;
+var snake;
 var gorilla;
 var gorilla2;
+
 var cursors;
 var spaceKey;
 var nachlinks = true;
 var abgestuertzt;
+var sprechblase;
 var test;
 var up = true;
 var benzin;
-var sprechblase;
 var score = 0;
 var scoreText;
 var level = 1;
 var inNextLevel= false;
+var inNextLevel2= false;
 var leben = 3;
 var lebenanzeige;
-var noise;
-var ufo2;
+var gameEnd = false;
 
 function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE); // arcade physics angewendet
@@ -75,7 +80,7 @@ function create() {
     map.addTilesetImage('tileset_3', 'tiles_himmel');
     //map.addTilesetImage('background', 'background');
 	
-
+	
 	/*Rain*/
     var emitter = game.add.emitter(game.world.centerX, 0, 400);
     game.physics.enable(emitter);
@@ -89,8 +94,6 @@ function create() {
 	emitter.maxRotation = 0;
 	emitter.start(false, 1600, 5, 0);
 	emitter.fixedToCamera = true;
-
-	
 	
 	
    	/*level 1*/
@@ -150,14 +153,14 @@ function create() {
 
 	/*collision für unter wasser*/
 	map.setCollision(38, true, layer4);
-	map.setTileIndexCallback(38, stirb, game, layer4);
+	map.setTileIndexCallback(38, stirbImWasser, game, layer4);
 	
 	
 
 	//der spieler soll sich erst nach 3 sekunden bewegen können
 	abgestuertzt = false;
 	
-	game.time.events.add(4200, function() {
+	game.time.events.add(10, function() {
 		abgestuertzt = true;
 	}, this);
 
@@ -173,7 +176,7 @@ function create() {
 
 	/*Spieler*/
   //  p = game.add.sprite(3500, 2000, 'player');
-    p = game.add.sprite(90, 100, 'player');
+    p = game.add.sprite(6300, 1800, 'player');
     p.animations.add('left', [0, 1, 2, 3], 10, true);
     p.animations.add('right', [5, 6, 7, 8], 10, true);
 	game.physics.enable(p);
@@ -182,11 +185,20 @@ function create() {
     p.body.linearDamping = 1;
     p.body.collideWorldBounds = true;
 	
-	
-	
+	//schlange
+    
+    snake = game.add.sprite(500, 1380, 'snake'); // position und parameter von preload
+    snake.animations.add('left', [0, 1, 2, ], 5, true);
+    snake.animations.add('right', [5, 6,  ], 5, true);
+	game.physics.enable(snake); // bekommt physics
+    
+    snake3_1 = game.add.sprite(1650, 1380, 'snake'); // position und parameter von preload
+    snake3_1.animations.add('left', [0, 1, 2, ], 5, true);
+    snake3_1.animations.add('right', [5, 6,  ], 5, true);
+	game.physics.enable(snake3_1); // bekommt physics
 
 	/*Gorilla*/
-   	gorilla = game.add.sprite(500, 2000, 'gorilla'); // position und parameter von preload
+   	gorilla = game.add.sprite(500, 1750, 'gorilla'); // position und parameter von preload
     gorilla.animations.add('left', [0, 1, 2, 3], 5, true);
     gorilla.animations.add('right', [5, 6, 7, 8], 5, true);
 	game.physics.enable(gorilla); // bekommt physics
@@ -205,19 +217,25 @@ function create() {
 	game.physics.enable(tiger);
     
     //2
-	tiger1 = game.add.sprite(5100, 2000, "tiger");
+	tiger1 = game.add.sprite(5000, 2000, "tiger");
 	tiger1.animations.add('right', [3, 4, 5], 5, true);
     tiger1.animations.add('left', [0, 1, 2], 5, true);
     
     game.physics.enable(tiger1);
     
+    tiger3_1 = game.add.sprite(500, 1780, "tiger");
+	tiger3_1.animations.add('right', [3, 4, 5], 5, true);
+    tiger3_1.animations.add('left', [0, 1, 2], 5, true);
     
-    //3
-    tiger2_1 = game.add.sprite(5060, 2000, "tiger");
-	tiger2_1.animations.add('right', [3, 4, 5], 5, true);
-    tiger2_1.animations.add('left', [0, 1, 2], 5, true);
+    game.physics.enable(tiger3_1);
     
-    game.physics.enable(tiger2_1);
+    tiger3_2 = game.add.sprite(900, 1350, "tiger");
+	tiger3_2.animations.add('right', [3, 4, 5], 5, true);
+    tiger3_2.animations.add('left', [0, 1, 2], 5, true);
+    
+    game.physics.enable(tiger3_2);
+    
+    
 
     
 
@@ -263,7 +281,7 @@ function create() {
 	fish2_4.animations.add("up", [0, 1], 4, true);
 	fish2_4.animations.add("down", [2, 3], 4, true);
     
-    fish2_5 = game.add.sprite(1350, 2000, "fish");
+    fish2_5 = game.add.sprite(1365, 2000, "fish");
 	fish2_5.animations.add("up", [0, 1], 4, true);
 	fish2_5.animations.add("down", [2, 3], 4, true);
     
@@ -290,14 +308,36 @@ function create() {
     fish2_11 = game.add.sprite(5460, 2000, "fish");
 	fish2_11.animations.add("up", [0, 1], 4, true);
 	fish2_11.animations.add("down", [2, 3], 4, true);
+
     
-    fish2_12 = game.add.sprite(5520, 2000, "fish");
-	fish2_12.animations.add("up", [0, 1], 4, true);
-	fish2_12.animations.add("down", [2, 3], 4, true);
-    
-    fish2_13 = game.add.sprite(5560, 2000, "fish");
+    fish2_13 = game.add.sprite(5590, 2000, "fish");
 	fish2_13.animations.add("up", [0, 1], 4, true);
 	fish2_13.animations.add("down", [2, 3], 4, true);
+    
+    fish3_1 = game.add.sprite(500, 2000, "fish");
+	fish3_1.animations.add("up", [0, 1], 4, true);
+	fish3_1.animations.add("down", [2, 3], 4, true);
+    
+    fish3_2 = game.add.sprite(700, 2000, "fish");
+	fish3_2.animations.add("up", [0, 1], 4, true);
+	fish3_2.animations.add("down", [2, 3], 4, true);
+    
+    fish3_3 = game.add.sprite(1000, 2000, "fish");
+	fish3_3.animations.add("up", [0, 1], 4, true);
+	fish3_3.animations.add("down", [2, 3], 4, true);
+    
+    fish3_4 = game.add.sprite(1870, 2000, "fish");
+	fish3_4.animations.add("up", [0, 1], 4, true);
+	fish3_4.animations.add("down", [2, 3], 4, true);
+    
+    fish3_5 = game.add.sprite(1970, 2000, "fish");
+	fish3_5.animations.add("up", [0, 1], 4, true);
+	fish3_5.animations.add("down", [2, 3], 4, true);
+    
+    fish3_6 = game.add.sprite(5060, 2000, "fish");
+	fish3_6.animations.add("up", [0, 1], 4, true);
+	fish3_6.animations.add("down", [2, 3], 4, true);
+    
 
     
 	game.physics.enable(fish);
@@ -316,12 +356,22 @@ function create() {
     game.physics.enable(fish2_8); 
     game.physics.enable(fish2_9); 
     game.physics.enable(fish2_10); 
-    game.physics.enable(fish2_11); 
-    game.physics.enable(fish2_12); 
+    game.physics.enable(fish2_11);
     game.physics.enable(fish2_13); 
-   
+    game.physics.enable(fish3_1);
+    game.physics.enable(fish3_2);
+    game.physics.enable(fish3_3);
+    game.physics.enable(fish3_4);
+    game.physics.enable(fish3_5);
+    game.physics.enable(fish3_6);
 
-	fish.body.bounce.y = 0,8;
+    
+	var sprechblase = game.add.image(50, 2200, 'sprechblase');
+    sprechblase.visible = false;
+
+
+	
+    fish.body.bounce.y = 0,8;
     fish.body.linearDamping = 1;
     fish.body.collideWorldBounds = true;
     
@@ -345,31 +395,24 @@ function create() {
     fish5.body.linearDamping = 1;
     fish5.body.collideWorldBounds = true;
     
-    noise = game.add.audio('noise');
-    noise.play();
-
     
-   
     /*UFO*/
-	ufo = game.add.group();
-    ufo.enableBody = true;
-    ufo.create(0, 100, 'ufo');
-
-    var sprechblase = game.add.image(50, 2200, 'sprechblase');
-    sprechblase.visible = false;
+	ufo = game.add.sprite(0, 100, "ufo");
+	game.physics.enable(ufo);
+	ufo.body.bounce.y = 0,8;
+    ufo.body.linearDamping = 1;
+    ufo.body.collideWorldBounds = true;
 
     /*Benzin*/
     benzin = game.add.group();
     benzin.enableBody = true;
 	benzin.create(890, 800, 'benzinkanister');
 	benzin.create(500, 800, 'benzinkanister');
-    benzin.create(1850, 1000, 'benzinkanister');
+    benzin.create(1890, 1000, 'benzinkanister');
     benzin.create(2200, 2000, 'benzinkanister');
-    benzin.create(2730, 2000, 'benzinkanister');
+    benzin.create(2700, 2000, 'benzinkanister');
     benzin.create(2730, 800, 'benzinkanister');
     benzin.create(5850, 800, 'benzinkanister');
-
-
 
 
 	/*Liter*/
@@ -378,65 +421,89 @@ function create() {
 
     game.physics.arcade.gravity.y = 250;
 	cursors = game.input.keyboard.createCursorKeys(); // interaktion durch tasten
-	
-
-	/*leertaste*/
-	/*spaceKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR); // spacetaste
-    spaceKey.onDown.add(togglePause, this);*/
-
 }
 
 function update() {
 
 	/*methoden die bei bestimmten kollisionen stattfinden*/
     game.physics.arcade.collide(p, layer3); // collision mit player und grundboden -> level 1
-	game.physics.arcade.collide(p, layer4, stirb, null, this)
+	game.physics.arcade.collide(p, layer4, stirbImWasser, null, this)
     game.physics.arcade.collide(p, layer6); // collision mit player und grundboden -> level 2
-	game.physics.arcade.collide(p, layer10, stirb, null, this)
-	//game.physics.arcade.collide(p, layer12); // collision mit player und grundboden -> level 3
-	game.physics.arcade.collide(p, layer13, stirb, null, this);
+	game.physics.arcade.collide(p, layer10, stirbImWasser, null, this)
+	game.physics.arcade.collide(p, layer12); // collision mit player und grundboden -> level 3
+	game.physics.arcade.collide(p, layer13, stirbImWasser, null, this);
 	
 	/* level 1 collisions */
 	game.physics.arcade.collide(benzin, layer3);
 	game.physics.arcade.collide(gorilla, layer3);
+    //game.physics.arcade.collide(snake, layer3);
+   // game.physics.arcade.collide(p, snake, layer4, stirb,null, this);
 	game.physics.arcade.collide(ufo, layer3);
+	game.physics.arcade.collide(ufo, layer12);
 	game.physics.arcade.collide(tiger, layer3);
 	game.physics.arcade.collide(tiger1, layer3);
-    game.physics.arcade.collide(tiger2_1, layer6);
-   
+    game.physics.arcade.collide(p, fish, layer3, stirb, null, this)
+    game.physics.arcade.collide(p, fish1, layer3, stirb, null, this)
+    game.physics.arcade.collide(p, fish2, layer3, stirb, null, this)
+    game.physics.arcade.collide(p, fish3, layer3, stirb, null, this)
+    game.physics.arcade.collide(p, fish4, layer3, stirb, null, this)
+    game.physics.arcade.collide(p, fish5, layer3, stirb, null, this)
+ 
 	
 	/* level 2 collisions */
 	game.physics.arcade.collide(benzin, layer6);
 	game.physics.arcade.collide(gorilla2, layer6);
+    game.physics.arcade.collide(snake, layer6);
    
     game.physics.arcade.collide(p, fish2_1, stirb, null, this);
     game.physics.arcade.collide(p, fish2_2, stirb, null, this);
+    game.physics.arcade.collide(p, fish2_3, stirb, null, this);
+    game.physics.arcade.collide(p, fish2_4, stirb, null, this);
+    game.physics.arcade.collide(p, fish2_5, stirb, null, this);
+    game.physics.arcade.collide(p, fish2_6, stirb, null, this);
+    game.physics.arcade.collide(p, fish2_7, stirb, null, this);
+    game.physics.arcade.collide(p, fish2_8, stirb, null, this);
+    game.physics.arcade.collide(p, fish2_9, stirb, null, this);
+    game.physics.arcade.collide(p, fish2_10, stirb, null, this);
+    game.physics.arcade.collide(p, fish2_11, stirb, null, this);
+    game.physics.arcade.collide(p, fish2_13, stirb, null, this);
 	game.physics.arcade.collide(ufo, layer6);
 	game.physics.arcade.collide(tiger, layer6);
 	game.physics.arcade.collide(tiger1, layer6);
-    game.physics.arcade.collide(p,tiger2_1, layer10, stirb, null, this);
-    
     
 	/* level 3 collisions */
 	game.physics.arcade.collide(benzin, layer12);
 	game.physics.arcade.collide(gorilla, layer12);
 	game.physics.arcade.collide(ufo, layer12);
-	game.physics.arcade.collide(tiger, layer12);
-	game.physics.arcade.collide(tiger1, layer12);
-	game.physics.arcade.collide(p, layer12);
+    game.physics.arcade.collide(tiger, layer12);
+	game.physics.arcade.collide(tiger3_1, layer12);
+    game.physics.arcade.collide(tiger3_2, layer12);
+	game.physics.arcade.collide(snake, layer12);
+    game.physics.arcade.collide(snake3_1, layer12);
+    
 		 
 	game.physics.arcade.overlap(p, gorilla, stirb, null, this);
     game.physics.arcade.overlap(p, gorilla2, stirb, null, this);
+    
 	game.physics.arcade.overlap(p, tiger, stirb, null, this);
-	game.physics.arcade.overlap(p, tiger1, stirb, null, this);
-
+	game.physics.arcade.overlap(p, tiger3_1, stirb, null, this);
+    game.physics.arcade.overlap(p, tiger3_2, stirb, null, this);
+    
+    game.physics.arcade.overlap(p, snake, stirb, null, this);
+    game.physics.arcade.overlap(p, snake3_1, stirb, null, this);
+    
+    game.physics.arcade.collide(p, fish3_1, stirb, null, this);
+    game.physics.arcade.collide(p, fish3_2, stirb, null, this);
+    game.physics.arcade.collide(p, fish3_3, stirb, null, this);
+    game.physics.arcade.collide(p, fish3_4, stirb, null, this);
+    game.physics.arcade.collide(p, fish3_5, stirb, null, this);
+    game.physics.arcade.collide(p, fish3_6, stirb, null, this);
 
 	game.physics.arcade.overlap(p, benzin, sammelBenzin, null, this);
 	
 	
     p.body.velocity.x = 0; // bewegung ohne was zu machen	
-
-
+	ufo.body.velocity.x = 0;
     
 
     if(level === 1 && p.x > 6375){
@@ -452,17 +519,22 @@ function update() {
 		layer9.destroy();
 		fish.kill();
 		fish1.kill();
+		fish2.kill();
+		fish3.kill();
+		fish4.kill();
+		fish5.kill();
         gorilla.kill();
-        tiger.kill();
-        tiger1.kill();
+        
+        
+        
+		
 		layer10.visible = false;
 		layer11.visible = true;
 		layer6.visible = false;
 		layer7.visible = true;
 		layer17.visible = true;
-        console.log("!!");
 		map2.setCollision(38, true, layer10);
-		map2.setTileIndexCallback(38, stirb, game, layer10);
+		map2.setTileIndexCallback(38, stirbImWasser, game, layer10);
 	
 		ufo.visible = false;
 		
@@ -475,96 +547,160 @@ function update() {
 		}, this);
         
         
-            //tier 
- 
+        benzin.create(1230, 2000, 'benzinkanister');
+        benzin.create(3100, 2217, 'benzinkanister');
+        benzin.create(4155, 1990, 'benzinkanister');
+        benzin.create(4630, 2320, 'benzinkanister');
+        benzin.create(4624, 2265, 'benzinkanister');
+       	benzin.create(6027, 2009, 'benzinkanister');
         
-    fish2_1.body.bounce.y = 200;
-    fish2_1.body.linearDamping = 100;
-    fish2_1.body.collideWorldBounds = true;
-    
-    fish2_2.body.bounce.y = 0,8;
-    fish2_2.body.linearDamping = 1;
-    fish2_2.body.collideWorldBounds = true;
-   
-    fish2_3.body.bounce.y = 0,8;
-    fish2_3.body.linearDamping = 1;
-    fish2_3.body.collideWorldBounds = true;
-    
-    fish2_4.body.bounce.y = 0,8;
-    fish2_4.body.linearDamping = 1;
-    fish2_4.body.collideWorldBounds = true;
-        
-    fish2_5.body.bounce.y = 0,8;
-    fish2_5.body.linearDamping = 1;
-    fish2_5.body.collideWorldBounds = true; 
-   
-    fish2_6.body.bounce.y = 0,8;
-    fish2_6.body.linearDamping = 1;
-    fish2_6.body.collideWorldBounds = true;
-        
-    fish2_7.body.bounce.y = 0,8;
-    fish2_7.body.linearDamping = 1;
-    fish2_7.body.collideWorldBounds = true;
-        
-    fish2_8.body.bounce.y = 0,8;
-    fish2_8.body.linearDamping = 1;
-    fish2_8.body.collideWorldBounds = true;
-        
-    fish2_9.body.bounce.y = 0,8;
-    fish2_9.body.linearDamping = 1;
-    fish2_9.body.collideWorldBounds = true;    
-    
-    fish2_10.body.bounce.y = 0,8;
-    fish2_10.body.linearDamping = 1;
-    fish2_10.body.collideWorldBounds = true;    
-   
-    fish2_11.body.bounce.y = 0,8;
-    fish2_11.body.linearDamping = 1;
-    fish2_11.body.collideWorldBounds = true;
-        
-    fish2_12.body.bounce.y = 0,8;
-    fish2_12.body.linearDamping = 1;
-    fish2_12.body.collideWorldBounds = true;
-        
-    fish2_13.body.bounce.y = 0,8;
-    fish2_13.body.linearDamping = 1;
-    fish2_13.body.collideWorldBounds = true;    
-    
-
-    
-  
+		fish2_1.body.bounce.y = 200;
+		fish2_1.body.linearDamping = 100;
+		fish2_1.body.collideWorldBounds = true;
+		
+		fish2_2.body.bounce.y = 0,8;
+		fish2_2.body.linearDamping = 1;
+		fish2_2.body.collideWorldBounds = true;
+	   
+		fish2_3.body.bounce.y = 0,8;
+		fish2_3.body.linearDamping = 1;
+		fish2_3.body.collideWorldBounds = true;
+		
+		fish2_4.body.bounce.y = 0,8;
+		fish2_4.body.linearDamping = 1;
+		fish2_4.body.collideWorldBounds = true;
+			
+		fish2_5.body.bounce.y = 0,8;
+		fish2_5.body.linearDamping = 1;
+		fish2_5.body.collideWorldBounds = true; 
+	   
+		fish2_6.body.bounce.y = 0,8;
+		fish2_6.body.linearDamping = 1;
+		fish2_6.body.collideWorldBounds = true;
+			
+		fish2_7.body.bounce.y = 0,8;
+		fish2_7.body.linearDamping = 1;
+		fish2_7.body.collideWorldBounds = true;
+			
+		fish2_8.body.bounce.y = 0,8;
+		fish2_8.body.linearDamping = 1;
+		fish2_8.body.collideWorldBounds = true;
+			
+		fish2_9.body.bounce.y = 0,8;
+		fish2_9.body.linearDamping = 1;
+		fish2_9.body.collideWorldBounds = true;    
+		
+		fish2_10.body.bounce.y = 0,8;
+		fish2_10.body.linearDamping = 1;
+		fish2_10.body.collideWorldBounds = true;    
+	   
+		fish2_11.body.bounce.y = 0,8;
+		fish2_11.body.linearDamping = 1;
+		fish2_11.body.collideWorldBounds = true;
+			
+		fish2_13.body.bounce.y = 0,8;
+		fish2_13.body.linearDamping = 1;
+		fish2_13.body.collideWorldBounds = true;    
     }
 
  
 
     
 	if(level === 2 && p.x > 6375 && inNextLevel){
+        
 		p.body.x = 0;
 		p.body.y = 2153;
 		
 		layer10.destroy();
+		layer17.destroy();
 		layer11.destroy();
 		layer6.destroy();
 		layer7.destroy();
-        gorilla.kill();
-		
-		layer12.visible = false;
+        layer4.destroy();
+        layer9.destroy();
+        
+        
+        layer12.visible = false;
 		layer13.visible = true;
 		layer14.visible = true;
 		layer15.visible = true;
 		layer16.visible = true;
 
+        
+        
+        fish2.kill();
+        fish2_1.kill();
+        fish2_2.kill();
+        fish2_3.kill();
+        fish2_4.kill();
+        fish2_5.kill();
+        fish2_6.kill();
+        fish2_7.kill();
+        fish2_8.kill();
+        fish2_9.kill();
+        fish2_10.kill();
+		fish2_11.kill();
+        fish2_13.kill();
+    
+        
+		
 		map3.setCollision(38, true, layer13);
-		map3.setTileIndexCallback(38, stirb, game, layer13);
+		map3.setTileIndexCallback(38, stirbImWasser, game, layer13);
 	
 		map3.setCollision(37);
 		level = 3;
 		scoreText.text = score+' Liter | Level' + level;
+
+		fish3_1.body.bounce.y = 0,8;
+        fish3_1.body.linearDamping = 1;
+        fish3_1.body.collideWorldBounds = true;
+            
+        fish3_2.body.bounce.y = 0,8;
+            fish3_2.body.linearDamping = 1;
+            fish3_2.body.collideWorldBounds = true;   
+            
+            fish3_3.body.bounce.y = 0,8;
+            fish3_3.body.linearDamping = 1;
+            fish3_3.body.collideWorldBounds = true;   
+        
+            fish3_4.body.bounce.y = 0,8;
+            fish3_4.body.linearDamping = 1;
+            fish3_4.body.collideWorldBounds = true;   
+        
+            fish3_5.body.bounce.y = 0,8;
+            fish3_5.body.linearDamping = 1;
+            fish3_5.body.collideWorldBounds = true;   
+        
+        fish3_6.body.bounce.y = 0,8;
+        fish3_6.body.linearDamping = 1;
+        fish3_6.body.collideWorldBounds = true;  
+        
+        benzin.create(1750, 1380, 'benzinkanister');
+        benzin.create(2270, 2000, 'benzinkanister');
+        benzin.create(3200, 1700, 'benzinkanister');
+         
+    	ufo.visible = true;
+			ufo.body.y = 1900;
+			ufo.body.x = 6190;
+		
+		game.time.events.add(5000, function() {
+    		inNextLevel2 = true;
+			
+			
+		}, this);
     }
+	
+	if(level === 3 && p.x > 6253 && inNextLevel2){
+		gameEnd = true;
+		p.animations.stop();
+		p.frame = 4;
+        p.body.velocity.y = -100;
+		ufo.body.velocity.y = -100;
+    }
+	
 
     /*player*/
-
-    if (cursors.up.isDown && abgestuertzt)
+    if (cursors.up.isDown && abgestuertzt && !gameEnd)
     {
         if (p.body.onFloor())
         {
@@ -572,16 +708,15 @@ function update() {
         }
     }
 
-    if (cursors.left.isDown && abgestuertzt)
+    if (cursors.left.isDown && abgestuertzt && !gameEnd)
     {
 		p.animations.play('left');
         p.body.velocity.x = -150;
     }
-    else if (cursors.right.isDown && abgestuertzt)
-    {	showsprechblase();
+    else if (cursors.right.isDown && abgestuertzt && !gameEnd)
+    {
 		p.animations.play('right');
         p.body.velocity.x = 150;
-
     }else
     {
         //  Stand still
@@ -620,32 +755,77 @@ function update() {
 		tiger1.nachlinks = true;
 	}
     
-      if(tiger2_1.nachlinks) {
-		tiger2_1.animations.play('left');
-        tiger2_1.body.velocity.x = -40;
+    if(tiger3_1.nachlinks) {
+		tiger3_1.animations.play('left');
+        tiger3_1.body.velocity.x = -80;
 	} else {
-		tiger2_1.animations.play('right');
-        tiger2_1.body.velocity.x = +40;
+		tiger3_1.animations.play('right');
+        tiger3_1.body.velocity.x = +80;
 	}
-    if(tiger2_1.body.blocked.left) {
-		tiger2_1.nachlinks = false;
-	} else if(tiger2_1.body.blocked.right){
-		tiger2_1.nachlinks = true;
+	
+	if(tiger3_1.body.blocked.left) {
+		tiger3_1.nachlinks = false;
+	} else if(tiger3_1.body.blocked.right){
+		tiger3_1.nachlinks = true;
+	}
+    
+     if(tiger3_2.nachlinks) {
+		tiger3_2.animations.play('left');
+        tiger3_2.body.velocity.x = -80;
+	} else {
+		tiger3_2.animations.play('right');
+        tiger3_2.body.velocity.x = +80;
+	}
+	
+	if(tiger3_2.body.blocked.left) {
+		tiger3_2.nachlinks = false;
+	} else if(tiger3_2.body.blocked.right){
+		tiger3_2.nachlinks = true;
 	}
     
       
     
-    // Vogel
+      
+    // Schlange
+    
+    	if(nachlinks) {
+		snake.animations.play('left');
+        snake.body.velocity.x = -80;
+	} else {
+		snake.animations.play('right');
+        snake.body.velocity.x = +80;
+	}
+	
+	if(snake.body.blocked.left) {
+		nachlinks = false;
+	} else if(snake.body.blocked.right){
+		nachlinks = true;
+	}
+    
+    	if(nachlinks) {
+		snake3_1.animations.play('left');
+        snake3_1.body.velocity.x = -80;
+	} else {
+		snake3_1.animations.play('right');
+        snake3_1.body.velocity.x = +80;
+	}
+	
+	if(snake3_1.body.blocked.left) {
+		nachlinks = false;
+	} else if(snake3_1.body.blocked.right){
+		nachlinks = true;
+	}
+    
 
 
 	/*gorilla*/
 
 	if(nachlinks) {
 		gorilla.animations.play('left');
-        gorilla.body.velocity.x = -100;
+        gorilla.body.velocity.x = -80;
 	} else {
 		gorilla.animations.play('right');
-        gorilla.body.velocity.x = +100;
+        gorilla.body.velocity.x = +80;
 	}
 	
 	if(gorilla.body.blocked.left) {
@@ -656,10 +836,10 @@ function update() {
 
     if(nachlinks) {
 		gorilla2.animations.play('left');
-        gorilla2.body.velocity.x = -40;
+        gorilla2.body.velocity.x = -80;
 	} else {
 		gorilla2.animations.play('right');
-        gorilla2.body.velocity.x = +40;
+        gorilla2.body.velocity.x = +80;
 	}
 	
 	if(gorilla2.body.blocked.left) {
@@ -667,6 +847,8 @@ function update() {
 	} else if(gorilla2.body.blocked.right){
 		nachlinks = true;
 	}
+    
+    
     
 	/*fisch*/
 	if (fish.body.onFloor()){
@@ -813,38 +995,75 @@ function update() {
     
      if (fish2_11.body.onFloor()){
         fish2_11.animations.play("up");
-		fish2_11.body.velocity.y= -390;
+		fish2_11.body.velocity.y= -350;
     }
 
     if(fish2_11.body.velocity.y >= 0){
         fish2_11.animations.play("down");
     }
     
-     if (fish2_12.body.onFloor()){
-        fish2_12.animations.play("up");
-		fish2_12.body.velocity.y= -390;
-    }
-
-    if(fish2_12.body.velocity.y >= 0){
-        fish2_12.animations.play("down");
-    }
     
      if (fish2_13.body.onFloor()){
         fish2_13.animations.play("up");
-		fish2_13.body.velocity.y= -390;
+		fish2_13.body.velocity.y= -350;
     }
 
     if(fish2_13.body.velocity.y >= 0){
         fish2_13.animations.play("down");
     }
     
-     if (fish2_13.body.onFloor()){
-        fish2_13.animations.play("up");
-		fish2_13.body.velocity.y= -390;
+     if (fish3_1.body.onFloor()){
+        fish3_1.animations.play("up");
+		fish3_1.body.velocity.y= -380;
     }
 
-    if(fish2_13.body.velocity.y >= 0){
-        fish2_13.animations.play("down");
+    if(fish3_1.body.velocity.y >= 0){
+        fish3_1.animations.play("down");
+    }
+    
+     if (fish3_2.body.onFloor()){
+        fish3_2.animations.play("up");
+		fish3_2.body.velocity.y= -380;
+    }
+
+    if(fish3_2.body.velocity.y >= 0){
+        fish3_2.animations.play("down");
+    }
+    
+     if (fish3_3.body.onFloor()){
+        fish3_3.animations.play("up");
+		fish3_3.body.velocity.y= -380;
+    }
+
+    if(fish3_3.body.velocity.y >= 0){
+        fish3_3.animations.play("down");
+    }
+    
+     if (fish3_4.body.onFloor()){
+        fish3_4.animations.play("up");
+		fish3_4.body.velocity.y= -380;
+    }
+
+    if(fish3_4.body.velocity.y >= 0){
+        fish3_4.animations.play("down");
+    }
+    
+     if (fish3_5.body.onFloor()){
+        fish3_5.animations.play("up");
+		fish3_5.body.velocity.y= -380;
+    }
+
+    if(fish3_5.body.velocity.y >= 0){
+        fish3_5.animations.play("down");
+    }
+    
+     if (fish3_6.body.onFloor()){
+        fish3_6.animations.play("up");
+		fish3_6.body.velocity.y= -380;
+    }
+
+    if(fish3_6.body.velocity.y >= 0){
+        fish3_6.animations.play("down");
     }
 
     
@@ -852,12 +1071,9 @@ function update() {
 
 function showsprechblase(){
 	console.log("sefef");
-	//sprechblase.reset(p.x, p.y);;
 	sprechblase.visible = true;
 	
 }
-
-
 
 function sammelBenzin (player, benzinkanister) { 
     benzinkanister.kill();
@@ -866,6 +1082,37 @@ function sammelBenzin (player, benzinkanister) {
 }
 
 function stirb (player, tier) {
+	leben = leben -1;
+	tier.body.velocity.x= 0; //somit werden die Tiere nicht aus ihrer Bahn "geschubst" 
+	lebenanzeige.loadTexture(leben+'leben');
+		if(leben < 1) {
+			p.kill();
+			game.state.start(game.state.current); // replay
+			leben = 3;
+		} else {
+			p.body.x = 0;
+			p.body.y = 2153;
+		}
+		if(leben < 1) {
+			p.kill();
+			game.state.start(game.state.current); // replay
+			leben = 3;
+		}  else {
+			p.body.x = 0;
+			p.body.y = 2169;
+		}
+    
+		if(leben < 1) {
+			p.kill();
+			game.state.start(game.state.current); // replay
+			leben = 3;
+		}  else {
+			p.body.x = 0;
+			p.body.y = 2153;
+		}
+}
+
+function stirbImWasser (player, water) {
 	leben = leben -1;
 	lebenanzeige.loadTexture(leben+'leben');
 		if(leben < 1) {
@@ -892,13 +1139,9 @@ function stirb (player, tier) {
 			p.body.x = 0;
 			p.body.y = 2153;
 		}
-	
-		//p.kill();
-		//game.state.start(game.state.current); // replay
-		//console.log("2");
 }
 
 function render() {
-    game.debug.body(p);
-    game.debug.bodyInfo(p, 32, 320);
+    //game.debug.body(p);
+    //game.debug.bodyInfo(p, 32, 320);
 }
