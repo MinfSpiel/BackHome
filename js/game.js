@@ -22,7 +22,8 @@ function preload(){
 	game.load.image("1leben", "assets/1leben.png");
 	game.load.image("0leben", "assets/0leben.png");
 	
-	game.load.image('sprechblase', 'assets/sprechblase.png');
+	game.load.image('sprechblase1', 'assets/1.png');
+	game.load.image('sprechblase2', 'assets/2.png');
 
 	
 	game.load.spritesheet('rain', 'assets/rain.png', 17, 17);
@@ -57,6 +58,9 @@ var inNextLevel2= false;
 var leben = 3;
 var lebenanzeige;
 var gameEnd = false;
+
+var sprechblase1;
+var sprechblase2;
 
 function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE); // arcade physics angewendet
@@ -148,20 +152,22 @@ function create() {
 	
 
     map.setCollision(37); // wert aus collision layer
-	
-    //layer.debug = true;
 
 	/*collision für unter wasser*/
 	map.setCollision(38, true, layer4);
 	map.setTileIndexCallback(38, stirbImWasser, game, layer4);
 	
+	sprechblase1 = game.add.sprite(100, 50, "sprechblase1");
+	sprechblase1.fixedToCamera = true;
+	sprechblase2 = game.add.sprite(100, 2000, "sprechblase2");
+	sprechblase2.visible = false;
 	
-
 	//der spieler soll sich erst nach 3 sekunden bewegen können
 	abgestuertzt = false;
-	
-	game.time.events.add(10, function() {
+	game.time.events.add(5000, function() {
 		abgestuertzt = true;
+		sprechblase1.visible = false;
+		sprechblase2.visible = true;
 	}, this);
 
 	/*button*/
@@ -174,9 +180,8 @@ function create() {
 	lebenanzeige = this.game.add.sprite(10, 50, '3leben');
 	lebenanzeige.fixedToCamera = true;
 
-	/*Spieler*/
-  //  p = game.add.sprite(3500, 2000, 'player');
-    p = game.add.sprite(6300, 1800, 'player');
+	//Spieler
+    p = game.add.sprite(93, 100, 'player');
     p.animations.add('left', [0, 1, 2, 3], 10, true);
     p.animations.add('right', [5, 6, 7, 8], 10, true);
 	game.physics.enable(p);
@@ -186,7 +191,6 @@ function create() {
     p.body.collideWorldBounds = true;
 	
 	//schlange
-    
     snake = game.add.sprite(500, 1380, 'snake'); // position und parameter von preload
     snake.animations.add('left', [0, 1, 2, ], 5, true);
     snake.animations.add('right', [5, 6,  ], 5, true);
@@ -197,7 +201,7 @@ function create() {
     snake3_1.animations.add('right', [5, 6,  ], 5, true);
 	game.physics.enable(snake3_1); // bekommt physics
 
-	/*Gorilla*/
+	//Gorilla
    	gorilla = game.add.sprite(500, 1750, 'gorilla'); // position und parameter von preload
     gorilla.animations.add('left', [0, 1, 2, 3], 5, true);
     gorilla.animations.add('right', [5, 6, 7, 8], 5, true);
@@ -208,39 +212,29 @@ function create() {
     gorilla2.animations.add('right', [5, 6, 7, 8], 5, true);
 	game.physics.enable(gorilla2); // bekommt physics
     
-	/*Tiger*/
-    //1
+	//Tiger
 	tiger = game.add.sprite(2200, 2000, "tiger");
 	tiger.animations.add('right', [3, 4, 5], 5, true);
     tiger.animations.add('left', [0, 1, 2], 5, true);
-    
 	game.physics.enable(tiger);
-    
-    //2
+
 	tiger1 = game.add.sprite(5000, 2000, "tiger");
 	tiger1.animations.add('right', [3, 4, 5], 5, true);
     tiger1.animations.add('left', [0, 1, 2], 5, true);
-    
     game.physics.enable(tiger1);
     
     tiger3_1 = game.add.sprite(500, 1780, "tiger");
 	tiger3_1.animations.add('right', [3, 4, 5], 5, true);
     tiger3_1.animations.add('left', [0, 1, 2], 5, true);
-    
     game.physics.enable(tiger3_1);
     
     tiger3_2 = game.add.sprite(900, 1350, "tiger");
 	tiger3_2.animations.add('right', [3, 4, 5], 5, true);
     tiger3_2.animations.add('left', [0, 1, 2], 5, true);
-    
     game.physics.enable(tiger3_2);
     
-    
 
-    
-
-
-	/*Fisch*/
+	//Fisch
 	fish = game.add.sprite(1300, 2000, "fish");
 	fish.animations.add("up", [0, 1], 4, true);
 	fish.animations.add("down", [2, 3], 4, true);
@@ -252,10 +246,6 @@ function create() {
     fish2 = game.add.sprite(4700, 2000, "fish");
 	fish2.animations.add("up", [0, 1], 4, true);
 	fish2.animations.add("down", [2, 3], 4, true);
-    
-    fish3 = game.add.sprite(4650, 2000, "fish");
-	fish3.animations.add("up", [0, 1], 4, true);
-	fish3.animations.add("down", [2, 3], 4, true);
     
     fish4 = game.add.sprite(6100, 2000, "fish");
 	fish4.animations.add("up", [0, 1], 4, true);
@@ -309,7 +299,6 @@ function create() {
 	fish2_11.animations.add("up", [0, 1], 4, true);
 	fish2_11.animations.add("down", [2, 3], 4, true);
 
-    
     fish2_13 = game.add.sprite(5590, 2000, "fish");
 	fish2_13.animations.add("up", [0, 1], 4, true);
 	fish2_13.animations.add("down", [2, 3], 4, true);
@@ -343,7 +332,6 @@ function create() {
 	game.physics.enable(fish);
 	game.physics.enable(fish1);
     game.physics.enable(fish2);
-	game.physics.enable(fish3);
     game.physics.enable(fish4);
     game.physics.enable(fish5);
     game.physics.enable(fish2_1);
@@ -365,11 +353,6 @@ function create() {
     game.physics.enable(fish3_5);
     game.physics.enable(fish3_6);
 
-    
-	var sprechblase = game.add.image(50, 2200, 'sprechblase');
-    sprechblase.visible = false;
-
-
 	
     fish.body.bounce.y = 0,8;
     fish.body.linearDamping = 1;
@@ -383,10 +366,6 @@ function create() {
     fish2.body.linearDamping = 1;
     fish2.body.collideWorldBounds = true;
     
-    fish3.body.bounce.y = 0,8;
-    fish3.body.linearDamping = 1;
-    fish3.body.collideWorldBounds = true;
-    
     fish4.body.bounce.y = 0,8;
     fish4.body.linearDamping = 1;
     fish4.body.collideWorldBounds = true;
@@ -396,14 +375,16 @@ function create() {
     fish5.body.collideWorldBounds = true;
     
     
-    /*UFO*/
+    //UFO
 	ufo = game.add.sprite(0, 100, "ufo");
 	game.physics.enable(ufo);
 	ufo.body.bounce.y = 0,8;
     ufo.body.linearDamping = 1;
     ufo.body.collideWorldBounds = true;
+	
+	
 
-    /*Benzin*/
+    //Benzin
     benzin = game.add.group();
     benzin.enableBody = true;
 	benzin.create(890, 800, 'benzinkanister');
@@ -415,9 +396,11 @@ function create() {
     benzin.create(5850, 800, 'benzinkanister');
 
 
-	/*Liter*/
+	//Liter
 	scoreText = game.add.text(10, 16, '0 Liter | Level' + level, {fontSize: '32px', fill: '#fff' });
-	scoreText.fixedToCamera = true; // immer im bild
+	scoreText.fixedToCamera = true;
+	
+	
 
     game.physics.arcade.gravity.y = 250;
 	cursors = game.input.keyboard.createCursorKeys(); // interaktion durch tasten
@@ -445,7 +428,6 @@ function update() {
     game.physics.arcade.collide(p, fish, layer3, stirb, null, this)
     game.physics.arcade.collide(p, fish1, layer3, stirb, null, this)
     game.physics.arcade.collide(p, fish2, layer3, stirb, null, this)
-    game.physics.arcade.collide(p, fish3, layer3, stirb, null, this)
     game.physics.arcade.collide(p, fish4, layer3, stirb, null, this)
     game.physics.arcade.collide(p, fish5, layer3, stirb, null, this)
  
@@ -505,6 +487,11 @@ function update() {
     p.body.velocity.x = 0; // bewegung ohne was zu machen	
 	ufo.body.velocity.x = 0;
     
+	
+	//Sprechblasen
+	if (p.body.onFloor()){
+    	
+    }
 
     if(level === 1 && p.x > 6375){
 		
@@ -520,7 +507,6 @@ function update() {
 		fish.kill();
 		fish1.kill();
 		fish2.kill();
-		fish3.kill();
 		fish4.kill();
 		fish5.kill();
         gorilla.kill();
@@ -537,6 +523,7 @@ function update() {
 		map2.setTileIndexCallback(38, stirbImWasser, game, layer10);
 	
 		ufo.visible = false;
+		sprechblase2.visible = false;
 		
 		map2.setCollision(37);
 		
@@ -611,6 +598,8 @@ function update() {
 		p.body.x = 0;
 		p.body.y = 2153;
 		
+		sprechblase2.visible = false;
+		
 		layer10.destroy();
 		layer17.destroy();
 		layer11.destroy();
@@ -656,20 +645,20 @@ function update() {
         fish3_1.body.collideWorldBounds = true;
             
         fish3_2.body.bounce.y = 0,8;
-            fish3_2.body.linearDamping = 1;
-            fish3_2.body.collideWorldBounds = true;   
+        fish3_2.body.linearDamping = 1;
+        fish3_2.body.collideWorldBounds = true;   
             
-            fish3_3.body.bounce.y = 0,8;
-            fish3_3.body.linearDamping = 1;
-            fish3_3.body.collideWorldBounds = true;   
+        fish3_3.body.bounce.y = 0,8;
+        fish3_3.body.linearDamping = 1;
+        fish3_3.body.collideWorldBounds = true;   
         
-            fish3_4.body.bounce.y = 0,8;
-            fish3_4.body.linearDamping = 1;
-            fish3_4.body.collideWorldBounds = true;   
+        fish3_4.body.bounce.y = 0,8;
+        fish3_4.body.linearDamping = 1;
+        fish3_4.body.collideWorldBounds = true;   
         
-            fish3_5.body.bounce.y = 0,8;
-            fish3_5.body.linearDamping = 1;
-            fish3_5.body.collideWorldBounds = true;   
+        fish3_5.body.bounce.y = 0,8;
+        fish3_5.body.linearDamping = 1;
+        fish3_5.body.collideWorldBounds = true;   
         
         fish3_6.body.bounce.y = 0,8;
         fish3_6.body.linearDamping = 1;
@@ -679,14 +668,15 @@ function update() {
         benzin.create(2270, 2000, 'benzinkanister');
         benzin.create(3200, 1700, 'benzinkanister');
          
-    	ufo.visible = true;
-			ufo.body.y = 1900;
-			ufo.body.x = 6190;
+			
+		ufo2 = game.add.sprite(6190, 1800, "ufo");
+		game.physics.enable(ufo2);
+		ufo2.body.bounce.y = 0,8;
+		ufo2.body.linearDamping = 1;
+		ufo2.body.collideWorldBounds = true;
 		
 		game.time.events.add(5000, function() {
     		inNextLevel2 = true;
-			
-			
 		}, this);
     }
 	
@@ -695,7 +685,7 @@ function update() {
 		p.animations.stop();
 		p.frame = 4;
         p.body.velocity.y = -100;
-		ufo.body.velocity.y = -100;
+		ufo2.body.velocity.y = -100;
     }
 	
 
@@ -726,7 +716,6 @@ function update() {
 
 
 	/*tiger*/
-	
 	if(tiger.nachlinks) {
 		tiger.animations.play('left');
         tiger.body.velocity.x = -40;
@@ -787,8 +776,7 @@ function update() {
     
       
     // Schlange
-    
-    	if(nachlinks) {
+    if(nachlinks) {
 		snake.animations.play('left');
         snake.body.velocity.x = -80;
 	} else {
@@ -802,7 +790,7 @@ function update() {
 		nachlinks = true;
 	}
     
-    	if(nachlinks) {
+    if(nachlinks) {
 		snake3_1.animations.play('left');
         snake3_1.body.velocity.x = -80;
 	} else {
@@ -877,15 +865,6 @@ function update() {
         fish2.animations.play("down");
     }
     
-    if (fish3.body.onFloor()){
-        fish3.animations.play("up");
-		fish3.body.velocity.y= -390;
-    }
-
-    if(fish3.body.velocity.y >= 0){
-        fish3.animations.play("down");
-    }
-    
      if (fish4.body.onFloor()){
         fish4.animations.play("up");
 		fish4.body.velocity.y= -370;
@@ -904,7 +883,7 @@ function update() {
         fish5.animations.play("down");
     }
     if (fish2_1.body.onFloor()){
-    fish2_1.animations.play("up");
+    	fish2_1.animations.play("up");
         fish2_1.body.velocity.y= -390;
     }
 
@@ -1008,20 +987,20 @@ function update() {
 		fish2_13.body.velocity.y= -350;
     }
 
-    if(fish2_13.body.velocity.y >= 0){
+    if (fish2_13.body.velocity.y >= 0){
         fish2_13.animations.play("down");
     }
     
-     if (fish3_1.body.onFloor()){
+    if (fish3_1.body.onFloor()){
         fish3_1.animations.play("up");
 		fish3_1.body.velocity.y= -380;
     }
 
-    if(fish3_1.body.velocity.y >= 0){
+    if (fish3_1.body.velocity.y >= 0){
         fish3_1.animations.play("down");
     }
     
-     if (fish3_2.body.onFloor()){
+    if (fish3_2.body.onFloor()){
         fish3_2.animations.play("up");
 		fish3_2.body.velocity.y= -380;
     }
@@ -1067,12 +1046,6 @@ function update() {
     }
 
     
-}
-
-function showsprechblase(){
-	console.log("sefef");
-	sprechblase.visible = true;
-	
 }
 
 function sammelBenzin (player, benzinkanister) { 
