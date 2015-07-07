@@ -1085,60 +1085,89 @@ function stirb (player, tier) {
 	leben = leben -1;
 	tier.body.velocity.x= 0; //somit werden die Tiere nicht aus ihrer Bahn "geschubst" 
 	lebenanzeige.loadTexture(leben+'leben');
+	if(level == 1){
 		if(leben < 1) {
 			p.kill();
-			game.state.start(game.state.current); // replay
+			level = 1;
+			inNextLevel= false;
+			inNextLevel2= false;
+			game.state.start(game.state.current,true,true); // replay
 			leben = 3;
 		} else {
 			p.body.x = 0;
 			p.body.y = 2153;
 		}
+	}
+	if(level == 2){
 		if(leben < 1) {
 			p.kill();
+			level = 1;
+			inNextLevel= false;
+			inNextLevel2= false;
 			game.state.start(game.state.current); // replay
 			leben = 3;
 		}  else {
 			p.body.x = 0;
 			p.body.y = 2169;
 		}
-    
+	}
+    if(level == 3){
 		if(leben < 1) {
 			p.kill();
+			level = 1;
+			inNextLevel= false;
+			inNextLevel2= false;
 			game.state.start(game.state.current); // replay
 			leben = 3;
 		}  else {
 			p.body.x = 0;
 			p.body.y = 2153;
 		}
+	}
 }
 
 function stirbImWasser (player, water) {
 	leben = leben -1;
 	lebenanzeige.loadTexture(leben+'leben');
+	if(level == 1){
 		if(leben < 1) {
 			p.kill();
-			game.state.start(game.state.current); // replay
+			level = 1;
+			inNextLevel= false;
+			inNextLevel2= false;
+			game.state.start(game.state.current,true,true); // replay
 			leben = 3;
 		} else {
 			p.body.x = 0;
 			p.body.y = 2153;
 		}
+	}
+	if(level == 2){
 		if(leben < 1) {
 			p.kill();
+			level = 1;
+			inNextLevel= false;
+			inNextLevel2= false;
 			game.state.start(game.state.current); // replay
 			leben = 3;
 		}  else {
 			p.body.x = 0;
 			p.body.y = 2169;
 		}
+	}
+    if(level == 3){
 		if(leben < 1) {
 			p.kill();
+			level = 1;
+			inNextLevel= false;
+			inNextLevel2= false;
 			game.state.start(game.state.current); // replay
 			leben = 3;
 		}  else {
 			p.body.x = 0;
 			p.body.y = 2153;
 		}
+	}
 }
 
 function render() {
