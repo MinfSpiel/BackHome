@@ -20,8 +20,9 @@ function preload(){
 	game.load.image("2leben", "assets/2leben.png");
 	game.load.image("1leben", "assets/1leben.png");
 	game.load.image("0leben", "assets/0leben.png");
-	
 	game.load.spritesheet('rain', 'assets/rain.png', 17, 17);
+	game.load.audio('noise', 'assets/sound.mp3');
+	game.load.image('sprechblase', 'assets/sprechblase.png');
 }
 var zahl = 5; // time to live
 var map;
@@ -33,23 +34,24 @@ var tileset;
 var layer;
 var p;
 var tiger;
-
 var gorilla;
 var gorilla2;
-
 var cursors;
 var spaceKey;
 var nachlinks = true;
-var abgestuertzt = false;
+var abgestuertzt;
 var test;
 var up = true;
 var benzin;
+var sprechblase;
 var score = 0;
 var scoreText;
 var level = 1;
 var inNextLevel= false;
 var leben = 3;
 var lebenanzeige;
+var noise;
+var ufo2;
 
 function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE); // arcade physics angewendet
@@ -73,7 +75,7 @@ function create() {
     map.addTilesetImage('tileset_3', 'tiles_himmel');
     //map.addTilesetImage('background', 'background');
 	
-	
+
 	/*Rain*/
     var emitter = game.add.emitter(game.world.centerX, 0, 400);
     game.physics.enable(emitter);
@@ -87,6 +89,8 @@ function create() {
 	emitter.maxRotation = 0;
 	emitter.start(false, 1600, 5, 0);
 	emitter.fixedToCamera = true;
+
+	
 	
 	
    	/*level 1*/
@@ -341,14 +345,18 @@ function create() {
     fish5.body.linearDamping = 1;
     fish5.body.collideWorldBounds = true;
     
-    
-    
+    noise = game.add.audio('noise');
+    noise.play();
+
     
    
     /*UFO*/
 	ufo = game.add.group();
     ufo.enableBody = true;
     ufo.create(0, 100, 'ufo');
+
+    var sprechblase = game.add.image(50, 2200, 'sprechblase');
+    sprechblase.visible = false;
 
     /*Benzin*/
     benzin = game.add.group();
@@ -362,6 +370,8 @@ function create() {
     benzin.create(5850, 800, 'benzinkanister');
 
 
+
+
 	/*Liter*/
 	scoreText = game.add.text(10, 16, '0 Liter | Level' + level, {fontSize: '32px', fill: '#fff' });
 	scoreText.fixedToCamera = true; // immer im bild
@@ -373,6 +383,7 @@ function create() {
 	/*leertaste*/
 	/*spaceKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR); // spacetaste
     spaceKey.onDown.add(togglePause, this);*/
+
 }
 
 function update() {
@@ -412,16 +423,19 @@ function update() {
 	game.physics.arcade.collide(ufo, layer12);
 	game.physics.arcade.collide(tiger, layer12);
 	game.physics.arcade.collide(tiger1, layer12);
+	game.physics.arcade.collide(p, layer12);
 		 
 	game.physics.arcade.overlap(p, gorilla, stirb, null, this);
     game.physics.arcade.overlap(p, gorilla2, stirb, null, this);
 	game.physics.arcade.overlap(p, tiger, stirb, null, this);
 	game.physics.arcade.overlap(p, tiger1, stirb, null, this);
 
+
 	game.physics.arcade.overlap(p, benzin, sammelBenzin, null, this);
 	
 	
     p.body.velocity.x = 0; // bewegung ohne was zu machen	
+
 
     
 
@@ -441,7 +455,6 @@ function update() {
         gorilla.kill();
         tiger.kill();
         tiger1.kill();
-		
 		layer10.visible = false;
 		layer11.visible = true;
 		layer6.visible = false;
@@ -547,9 +560,6 @@ function update() {
 		map3.setCollision(37);
 		level = 3;
 		scoreText.text = score+' Liter | Level' + level;
-
-         
-    
     }
 
     /*player*/
@@ -568,9 +578,10 @@ function update() {
         p.body.velocity.x = -150;
     }
     else if (cursors.right.isDown && abgestuertzt)
-    {
+    {	showsprechblase();
 		p.animations.play('right');
         p.body.velocity.x = 150;
+
     }else
     {
         //  Stand still
@@ -835,9 +846,15 @@ function update() {
     if(fish2_13.body.velocity.y >= 0){
         fish2_13.animations.play("down");
     }
-    
 
     
+}
+
+function showsprechblase(){
+	console.log("sefef");
+	//sprechblase.reset(p.x, p.y);;
+	sprechblase.visible = true;
+	
 }
 
 
